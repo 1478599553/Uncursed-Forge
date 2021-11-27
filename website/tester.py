@@ -1,9 +1,9 @@
-import queue
-spiderQueue = queue.Queue(maxsize = 0)
-for i in range(10):
-	spiderQueue.put(i)
-item = spiderQueue.get()
-print(spiderQueue.qsize())
-spiderQueue.task_done()
-spiderQueue.join()
 
+from pymongo import MongoClient
+#client = MongoClient()
+
+client = MongoClient('localhost', 27017)
+db = client.uncursedforge
+collection = db.modsinfo
+
+z = collection.find({"si": {'$exists': True}}).count()

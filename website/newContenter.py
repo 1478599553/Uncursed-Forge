@@ -72,6 +72,7 @@ def spiderFunc():
             icon_link = info_response_json["attachments"][0]["thumbnailUrl"]
             full_icon_link = info_response_json["attachments"][0]["url"]
             icon_file_name = info_response_json["attachments"][0]["title"]
+            
             print(icon_link)
             iconFileResponse = requests.get(url=icon_link,  verify=False)
             full_iconFileResponse = requests.get(url=full_icon_link,  verify=False)
@@ -81,12 +82,16 @@ def spiderFunc():
             
             full_icon_file_obj = open('./assets/full_icons/'+icon_file_name,mode="wb")
             full_icon_file_obj.write(full_iconFileResponse.content)
+            
+            summary = info_response_json['summary']
 
+            
             infoDict = {}
             infoDict["id"] = id_to_crawl
             infoDict['title'] = title
             infoDict['des'] = des
             infoDict['files'] = files_info_list
+            infoDict['summary'] = summary
 
             infoDict['icon_file_name'] = icon_file_name
             idFlagDic = {}
@@ -94,10 +99,16 @@ def spiderFunc():
             
 
             #collection.insert_one(infoDict)
-            collection.update_one({"id":id_to_crawl},{"$set":infoDict})
-        
+            docCount = collection.find({"id":id_to_crawl}).count()
+            if docCount is None:
+                collection.insert_one(infoDict)
+            else:
+                collection.update_one({"id":id_to_crawl},{"$set":infoDict})
+            
+            if spiderQueue.empty():
+                break
         except Exception as e:
-            print(Exception)
+            print(repr(e))
             print("发生在"+str(id_to_crawl))
             spiderQueue.put(id_to_crawl)
 
