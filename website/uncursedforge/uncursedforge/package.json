@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "postcss css/tailwind.css -o public/build/tailwind.css & postcss css/materialize.css -o public/build/mt.css"
+    "build": "postcss css/tailwind.css -o public/build/tailwind/index.css & postcss css/materialize.css -o public/build/mt.css"
   },
   "keywords": [],
   "author": "",

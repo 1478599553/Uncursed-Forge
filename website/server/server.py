@@ -4,6 +4,9 @@ import pymongo
 
 
 app = Flask (__name__)
+client = pymongo.MongoClient('localhost', 27017)
+db = client.uncursedforge
+collection = db.modsinfo
 
 @app.route("/")
 def index():
@@ -14,15 +17,14 @@ def index():
     modSummary = []
     modThumbnailIconURL_list = []
     indexPageList = []
-
-    client = pymongo.MongoClient('localhost', 27017)
-    db = client.uncursedforge
-    collection = db.modsinfo
+    
+    
     res = collection.aggregate([{"$sample":{"size":10}}])
     for item in res:
         modTitle.append(item['title'])
         modSummary.append(item['summary'])
         modThumbnailIcon.append(item['icon_file_name'])
+        modPage.append("/mod/"+item['id'])
     for icon in modThumbnailIcon:
         num = 0
         
@@ -31,9 +33,19 @@ def index():
     
     return render_template('public/index.html',modPage = modPage , modSummary = modSummary , modThumbnailIcon = modThumbnailIconURL_list , modTitle = modTitle)
 
+
+
 @app.route('/mod/<addonID>/')
 def modPage(addonID):
-    print(addonID)
-    return addonID
+    infoDBRes = collection.find({"id": addonID})
+    for item in infoDBRes:
+        icon_file_name = item['icon_file_name']
+        modTitle = item['title']
+        modDes = item['des']
+
+    modIcon = url_for('static',filename='full_icons/'+icon_file_name)
+    
+
+    return render_template('public/modPage.html',modIcon = modIcon,modTitle = modTitle,modDes = modDes)
 if __name__ == "__main__":
     app.run(port=8000)
