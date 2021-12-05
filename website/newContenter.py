@@ -33,7 +33,7 @@ for id in idlist:
 
 def spiderFunc():
     
-    while True:
+    while spiderQueue.empty()==False:
         try:
             id_to_crawl = spiderQueue.get()
             
@@ -99,14 +99,10 @@ def spiderFunc():
             
 
             #collection.insert_one(infoDict)
-            docCount = collection.find({"id":id_to_crawl})
-            if docCount is None:
-                collection.insert_one(infoDict)
-            else:
-                collection.update_one({"id":id_to_crawl},{"$set":infoDict})
+            
+            collection.update_one({"id":id_to_crawl},{"$set":infoDict},True)
             print('还剩'+str(spiderQueue.qsize())+"个")
-            if spiderQueue.empty():
-                break
+            
         except Exception as e:
             print(repr(e))
             print("发生在"+str(id_to_crawl))
