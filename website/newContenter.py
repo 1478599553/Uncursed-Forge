@@ -21,7 +21,11 @@ client = MongoClient('localhost', 27017)
 db = client.uncursedforge
 collection = db.modsinfo
 idlist = []
-idfile = open('ids.txt',mode="r")
+
+#实验设置，如果出现问题改为 ids.txt
+idfile = open('ids_autoFilled.txt',mode="r")
+#
+
 for id in idfile.readlines():
     idlist.append(id.strip('\n'))
 idfile.close()
@@ -102,14 +106,14 @@ def spiderFunc():
             
             collection.update_one({"id":id_to_crawl},{"$set":infoDict},True)
             print('还剩'+str(spiderQueue.qsize())+"个")
-            
+            spiderQueue.task_done()
         except Exception as e:
             print(repr(e))
             print("发生在"+str(id_to_crawl))
             spiderQueue.put(id_to_crawl)
 
 t_list = []
-for i in range(10):
+for i in range(30):
     t = threading.Thread(target=spiderFunc)
     t_list.append(t)
     t.start()

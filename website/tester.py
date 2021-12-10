@@ -1,9 +1,7 @@
+with open('ids_autoFilled.txt') as f:
+    testList = f.readlines()
 
-from pymongo import MongoClient
-#client = MongoClient()
 
-client = MongoClient('localhost', 27017)
-db = client.uncursedforge
-collection = db.modsinfo
-
-z = collection.find({"si": {'$exists': True}}).count()
+formatList = list(set(testList))
+formatList.sort(key=testList.index)
+print (len(formatList))
