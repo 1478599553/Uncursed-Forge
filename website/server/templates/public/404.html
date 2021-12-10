@@ -1,9 +1,9 @@
 <head>
     <meta charset="UTF-8">
     
-    <link rel="stylesheet" href="build/mt.css">
-    
-    <link rel="stylesheet" href="build/tailwind.css">
+    <link rel="stylesheet" href="{{ url_for('static',filename='/css/mt.css') }}">
+        
+        <link rel="stylesheet" href="{{ url_for('static',filename='/css/tailwind/index.css') }}">
     
     <title>Uncursed Forge - 404 Rick Rolled</title>
 
@@ -24,7 +24,7 @@
 	max-width:800px;
 	margin:0 auto;
   color: transparent;
-  background: url(assets/rick.gif) center/cover;
+  background: url({{ url_for('static',filename='/assets/rick.gif') }}) center/cover;
  -webkit-background-clip: text;
   background-clip: text;
   word-spacing: 0px;

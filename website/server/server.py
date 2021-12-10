@@ -1,3 +1,4 @@
+from logging import error
 from flask import Flask,request,render_template,url_for
 from flask_sqlalchemy import SQLAlchemy
 import pymongo
@@ -47,5 +48,11 @@ def modPage(addonID):
     
 
     return render_template('public/modPage.html',modIcon = modIcon,modTitle = modTitle,modDes = modDes)
+
+@app.errorhandler(404)
+def page_unauthorized(error):
+    return render_template('public/404.html'), 404
+
+
 if __name__ == "__main__":
     app.run(port=8000)
