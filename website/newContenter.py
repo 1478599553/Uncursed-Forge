@@ -36,8 +36,8 @@ for id in idlist:
 
 
 def spiderFunc():
-    print(spiderQueue.empty())
-    while spiderQueue.empty()==False:
+    print(spiderQueue.qsize())
+    while (spiderQueue.qsize()==0)==False:
         try:
             id_to_crawl = spiderQueue.get()
             
