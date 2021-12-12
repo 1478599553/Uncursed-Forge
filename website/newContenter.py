@@ -31,6 +31,7 @@ for id in idfile.readlines():
 idfile.close()
 
 spiderQueue = queue.Queue(maxsize = 0)
+TaskQueue = queue.Queue(maxsize = 0)
 for id in idlist:
     spiderQueue.put(id)
 
@@ -73,10 +74,17 @@ def spiderFunc():
             files_info_list.sort(key= lambda x:x["FileDatetime"],reverse=True)
 
             #icon
-            icon_link = info_response_json["attachments"][0]["thumbnailUrl"]
-            full_icon_link = info_response_json["attachments"][0]["url"]
-            icon_file_name = info_response_json["attachments"][0]["title"]
             
+            for icon_item in info_response_json["attachments"]:
+                
+                if icon_item['isDefault'] == True:
+                    TaskQueue.put(icon_item)
+                    
+            item = TaskQueue.get()
+            print(item)
+            icon_link = item["thumbnailUrl"]
+            full_icon_link = item["url"]
+            icon_file_name = item["title"]
             print(icon_link)
             iconFileResponse = requests.get(url=icon_link,  verify=False)
             full_iconFileResponse = requests.get(url=full_icon_link,  verify=False)
@@ -107,13 +115,13 @@ def spiderFunc():
             collection.update_one({"id":id_to_crawl},{"$set":infoDict},True)
             print('还剩'+str(spiderQueue.qsize())+"个")
             spiderQueue.task_done()
-        except Exception as e:
+        except IndexError as e:
             print(repr(e))
             print("发生在"+str(id_to_crawl))
             spiderQueue.put(id_to_crawl)
 
 t_list = []
-for i in range(30):
+for i in range(15):
     t = threading.Thread(target=spiderFunc)
     t_list.append(t)
     t.start()
