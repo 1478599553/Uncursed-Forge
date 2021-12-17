@@ -22,7 +22,6 @@ db = client.uncursedforge
 collection = db.modsinfo
 idlist = []
 
-#实验设置，如果出现问题改为 ids.txt
 idfile = open('ids_autoFilled.txt',mode="r")
 #
 
@@ -49,7 +48,7 @@ def spiderFunc():
             info_url = "https://addons-ecs.forgesvc.net/api/v2/addon/"+str(id_to_crawl)
             files_info_url = "https://addons-ecs.forgesvc.net/api/v2/addon/"+str(id_to_crawl)+"/files"
 
-            time.sleep(4)
+            time.sleep(8)
             header = {"user-agent": ua.random,"Connection":"close"}
             
             des_response = requests.get(url=des_url,headers = header,  verify=False)
@@ -78,22 +77,12 @@ def spiderFunc():
             for icon_item in info_response_json["attachments"]:
                 
                 if icon_item['isDefault'] == True:
-                    TaskQueue.put(icon_item)
+                    icon_item_list = {}
+                    icon_item_list['id'] = id_to_crawl
+                    icon_item_list['icon_info'] = icon_item
+                    TaskQueue.put(icon_item_list)
                     
-            item = TaskQueue.get()
-            print(item)
-            icon_link = item["thumbnailUrl"]
-            full_icon_link = item["url"]
-            icon_file_name = item["title"]
-            print(icon_link)
-            iconFileResponse = requests.get(url=icon_link,  verify=False)
-            full_iconFileResponse = requests.get(url=full_icon_link,  verify=False)
-
-            icon_file_obj = open('./assets/icons/'+icon_file_name,mode="wb")
-            icon_file_obj.write(iconFileResponse.content)
             
-            full_icon_file_obj = open('./assets/full_icons/'+icon_file_name,mode="wb")
-            full_icon_file_obj.write(full_iconFileResponse.content)
             
             summary = info_response_json['summary']
 
@@ -105,7 +94,7 @@ def spiderFunc():
             infoDict['files'] = files_info_list
             infoDict['summary'] = summary
 
-            infoDict['icon_file_name'] = icon_file_name
+            
             idFlagDic = {}
             idFlagDic['id'] = id_to_crawl
             
@@ -115,15 +104,48 @@ def spiderFunc():
             collection.update_one({"id":id_to_crawl},{"$set":infoDict},True)
             print('还剩'+str(spiderQueue.qsize())+"个")
             spiderQueue.task_done()
-        except IndexError as e:
+        except Exception as e:
             print(repr(e))
             print("发生在"+str(id_to_crawl))
             spiderQueue.put(id_to_crawl)
 
 t_list = []
-for i in range(15):
+for i in range(20):
     t = threading.Thread(target=spiderFunc)
     t_list.append(t)
     t.start()
 for t in t_list:
     t.join()
+
+
+def get_icon():
+        item = TaskQueue.get()
+        print(item)
+        icon_link = item['icon_info']["thumbnailUrl"]
+        full_icon_link = item['icon_info']["url"]
+        icon_file_name = item['icon_info']["title"]
+        print(icon_link)
+        iconFileResponse = requests.get(url=icon_link,  verify=False)
+        full_iconFileResponse = requests.get(url=full_icon_link,  verify=False)
+
+        icon_file_obj = open('./assets/icons/'+icon_file_name,mode="wb")
+        icon_file_obj.write(iconFileResponse.content)
+        icon_file_obj.close()
+
+        full_icon_file_obj = open('./assets/full_icons/'+icon_file_name,mode="wb")
+        full_icon_file_obj.write(full_iconFileResponse.content)
+        full_icon_file_obj.close()
+
+        icon_info_dic={}
+        icon_info_dic['icon_file_name'] = icon_file_name
+        collection.update_one({"id":item['id']},{"$set":icon_info_dic},True)
+        print(icon_file_name)
+icon_t_list = []
+
+for i in range(15):
+    icon_t = threading.Thread(target=get_icon)
+    icon_t_list.append(icon_t)
+    icon_t.start()
+for icon_t in icon_t_list:
+    icon_t.join()
+
