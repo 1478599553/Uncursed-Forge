@@ -25,7 +25,7 @@ def index():
         modTitle.append(item['title'])
         modSummary.append(item['summary'])
         modThumbnailIcon.append(item['icon_file_name'])
-        modPage.append("/mod/"+item['id'])
+        modPage.append("http://101.34.183.3:8001/mod/"+item['id'])
     for icon in modThumbnailIcon:
         num = 0
         

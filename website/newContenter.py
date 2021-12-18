@@ -37,7 +37,7 @@ for id in idlist:
 
 def spiderFunc():
     print(spiderQueue.qsize())
-    while (spiderQueue.qsize()==0)==False:
+    while (int(spiderQueue.qsize())==0)==False:
         try:
             id_to_crawl = spiderQueue.get()
             
@@ -119,27 +119,29 @@ for t in t_list:
 
 
 def get_icon():
-        item = TaskQueue.get()
-        print(item)
-        icon_link = item['icon_info']["thumbnailUrl"]
-        full_icon_link = item['icon_info']["url"]
-        icon_file_name = item['icon_info']["title"]
-        print(icon_link)
-        iconFileResponse = requests.get(url=icon_link,  verify=False)
-        full_iconFileResponse = requests.get(url=full_icon_link,  verify=False)
+        while TaskQueue.empty()==False:    
+            item = TaskQueue.get()
+            print(item)
+            icon_link = item['icon_info']["thumbnailUrl"]
+            full_icon_link = item['icon_info']["url"]
+            icon_file_name = item['icon_info']["title"]
+            print(icon_link)
+            iconFileResponse = requests.get(url=icon_link,  verify=False)
+            full_iconFileResponse = requests.get(url=full_icon_link,  verify=False)
 
-        icon_file_obj = open('./assets/icons/'+icon_file_name,mode="wb")
-        icon_file_obj.write(iconFileResponse.content)
-        icon_file_obj.close()
+            icon_file_obj = open('./assets/icons/'+icon_file_name,mode="wb")
+            icon_file_obj.write(iconFileResponse.content)
+            icon_file_obj.close()
 
-        full_icon_file_obj = open('./assets/full_icons/'+icon_file_name,mode="wb")
-        full_icon_file_obj.write(full_iconFileResponse.content)
-        full_icon_file_obj.close()
+            full_icon_file_obj = open('./assets/full_icons/'+icon_file_name,mode="wb")
+            full_icon_file_obj.write(full_iconFileResponse.content)
+            full_icon_file_obj.close()
 
-        icon_info_dic={}
-        icon_info_dic['icon_file_name'] = icon_file_name
-        collection.update_one({"id":item['id']},{"$set":icon_info_dic},True)
-        print(icon_file_name)
+            icon_info_dic={}
+            icon_info_dic['icon_file_name'] = icon_file_name
+            collection.update_one({"id":item['id']},{"$set":icon_info_dic},True)
+            print(icon_file_name)
+            TaskQueue.task_done()
 icon_t_list = []
 
 for i in range(15):
