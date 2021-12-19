@@ -24,7 +24,10 @@ def index():
     for item in res:
         modTitle.append(item['title'])
         modSummary.append(item['summary'])
-        modThumbnailIcon.append(item['icon_file_name'])
+        try:
+            modThumbnailIcon.append(item['icon_file_name'])
+        except KeyError:
+            modThumbnailIcon.append('no_response.png')
         modPage.append("/mod/"+item['id'])
     for icon in modThumbnailIcon:
         num = 0
@@ -40,10 +43,15 @@ def index():
 def modPage(addonID):
     infoDBRes = collection.find({"id": addonID})
     for item in infoDBRes:
-        icon_file_name = item['icon_file_name']
+        
+        try:
+            icon_file_name = item['icon_file_name']
+        except KeyError:
+            icon_file_name = 'no_response.png'
+        
         modTitle = item['title']
         modDes = item['des']
-
+    
     modIcon = url_for('static',filename='full_icons/'+icon_file_name)
     
 
